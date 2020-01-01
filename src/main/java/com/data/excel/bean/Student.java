@@ -1,7 +1,5 @@
 package com.data.excel.bean;
 
-
-
 /**
  * @author ：clt
  * @Date ：Created in 21:27 2019/12/31

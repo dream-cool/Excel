@@ -19,6 +19,7 @@ import java.util.List;
 public class ExcelDataUtils {
 
     private ExcelDataUtils() {
+
     }
 
     public static int count = 0;

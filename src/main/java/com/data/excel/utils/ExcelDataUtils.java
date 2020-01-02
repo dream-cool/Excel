@@ -2,13 +2,12 @@ package com.data.excel.utils;
 
 import com.data.excel.bean.Student;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -19,31 +18,32 @@ import java.util.List;
  */
 public class ExcelDataUtils {
 
-    private ExcelDataUtils(){}
+    private ExcelDataUtils() {
+    }
 
     public static int count = 0;
 
     /**
      * @param filePath excel文件路径
      * @return Excel文件的行数据的对象结果集
-     *  从filePath中的Excel表格中，
-     *  将所有行的数据转行成相应的Student对象
+     * 从filePath中的Excel表格中，
+     * 将所有行的数据转行成相应的Student对象
      */
     public static List<Object> getExcelData(String filePath) throws IOException {
         List<Object> list = new ArrayList<>(10);
         XSSFWorkbook wookbook = new XSSFWorkbook(new FileInputStream(filePath));
         for (Sheet sheet : wookbook) {
             Iterator<Row> it = sheet.rowIterator();
-            while (it.hasNext()){
+            while (it.hasNext()) {
                 Row row = it.next();
                 Student student = new Student();
                 for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
-                    student.setProperty(i+1,row.getCell(i).toString());
+                    student.setProperty(i + 1, row.getCell(i).toString());
                 }
-                if ("学号".equals(student.getStuNum())){
+                if ("学号".equals(student.getStuNum())) {
                     continue;
                 }
-                if ("陈留涛".equals(student.getName())){
+                if ("陈留涛".equals(student.getName())) {
                     count++;
                 }
                 list.add(student);
@@ -61,30 +61,30 @@ public class ExcelDataUtils {
      * 再遍历对应机构下的用户信息的所有行，如果能找到与之匹配的信息，
      * 则将结果放入list中。
      */
-    public static List<Object> getExcelData(String filePath,String dirPath) throws IOException {
+    public static List<Object> getExcelData(String filePath, String dirPath) throws IOException {
         List<Object> list = new ArrayList<>(10);
         XSSFWorkbook wookbook = new XSSFWorkbook(new FileInputStream(filePath));
         for (Sheet sheet : wookbook) {
             Iterator<Row> it = sheet.rowIterator();
-            while (it.hasNext()){
+            while (it.hasNext()) {
                 Row row = it.next();
                 String id = row.getCell(0).toString();
                 String userName = row.getCell(1).toString();
                 String category = row.getCell(6).toString();
                 String orgName = row.getCell(5).toString();
-                if ("1-l".equals(category)){
-                    String orgFilePath = recursionFile(orgName,dirPath);
-                    if (orgFilePath != null){
+                if ("1-l".equals(category)) {
+                    String orgFilePath = recursionFile(orgName, dirPath);
+                    if (orgFilePath != null) {
                         HSSFWorkbook orgExcel = new HSSFWorkbook(new FileInputStream(orgFilePath));
                         final Iterator<Row> orgIt = orgExcel.getSheetAt(0).rowIterator();
                         orgIt.next();
-                        while (orgIt.hasNext()){
+                        while (orgIt.hasNext()) {
                             final Row orgRow = orgIt.next();
-                            if (orgRow.getCell(3) == null){
+                            if (orgRow.getCell(3) == null) {
                                 break;
                             }
-                            if (userName!=null && userName.equals(orgRow.getCell(3).toString())){
-                                list.add(id+":"+userName);
+                            if (userName != null && userName.equals(orgRow.getCell(3).toString())) {
+                                list.add(id + ":" + userName);
                                 break;
                             }
                         }
@@ -97,18 +97,18 @@ public class ExcelDataUtils {
 
     /**
      * @param filePath 文件路径
-     * 如果给定的文件路径是文件夹的话则递归遍历文件夹
-     * 将文件夹下的所有Excel表格数据转换成对应的Student对象
+     *                 如果给定的文件路径是文件夹的话则递归遍历文件夹
+     *                 将文件夹下的所有Excel表格数据转换成对应的Student对象
      */
     public static void recursionFile(String filePath) throws IOException {
         File file = new File(filePath);
-        if (file.getPath().endsWith("xlsx")){
+        if (file.getPath().endsWith("xlsx")) {
             System.out.println(getExcelData(filePath));
         } else {
             String[] files = file.list();
-            if (files != null){
-                for (int i = 0; i <  files.length; i++) {
-                    recursionFile(filePath+"/"+files[i]);
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    recursionFile(filePath + "/" + files[i]);
                 }
             }
         }
@@ -116,25 +116,25 @@ public class ExcelDataUtils {
 
 
     /**
-     * @param orgName 机构名称
+     * @param orgName  机构名称
      * @param filePath 文件路径
      * @return 对应的机构名称的文件
      * 从给定的filePath文件路径中递归遍历其所有文件
      * 然后逐一比较目标文件是否是所寻找文件
      * 是的话，则返回结果
      */
-    public static String recursionFile(String orgName,String filePath) throws IOException {
+    public static String recursionFile(String orgName, String filePath) throws IOException {
         File file = new File(filePath);
-        if (file.getPath().endsWith("xlsx")||file.getPath().endsWith("xls")){
-            if (file.getPath().contains(orgName)&&file.getPath().contains("委员")){
+        if (file.getPath().endsWith("xlsx") || file.getPath().endsWith("xls")) {
+            if (file.getPath().contains(orgName) && file.getPath().contains("委员")) {
                 return file.getPath();
             }
         } else {
             String[] files = file.list();
-            if (files != null){
-                for (int i = 0; i <  files.length; i++) {
-                    String result = recursionFile(orgName,filePath+"/"+files[i]);
-                    if (result != null){
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    String result = recursionFile(orgName, filePath + "/" + files[i]);
+                    if (result != null) {
                         return result;
                     }
                 }
@@ -145,9 +145,48 @@ public class ExcelDataUtils {
 
     public static void main(String[] args) throws IOException {
 //        String filePath ="C:/Users/Mrchen/Desktop/新建文件夹 (2)";
-        String filePath ="C:/Users/Mrchen/Desktop/无状态用户.xls";
-        String dirPath ="C:/Users/Mrchen/Desktop/现场返回的数据";
-        System.out.println(getExcelData(filePath,dirPath));
+        String filePath = "C:/Users/Mrchen/Desktop/无状态用户.xls";
+        String dirPath = "C:/Users/Mrchen/Desktop/现场返回的数据";
+        System.out.println(getExcelData(filePath, dirPath));
     }
+
+    /**
+     * @param sourceFilePath Excel源文件路径
+     * @param targetFilePath 目标txt文件路径
+     */
+    public static void handleExcelData(String sourceFilePath,String targetFilePath) throws IOException {
+
+        List<String> list = new ArrayList<>();
+        //读取Excel文件
+        XSSFWorkbook excel = new XSSFWorkbook(new FileInputStream(sourceFilePath));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(targetFilePath)));
+        //遍历Excel文件中对应的表格
+        for (Sheet sheet : excel) {
+            Iterator<Row> it = sheet.rowIterator();
+            //遍历表格中的每一行
+            while (it.hasNext()) {
+                Row row = it.next();
+                //遍历对应行的列
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < row.getPhysicalNumberOfCells(); i++) {
+                    Cell cell = null;
+                    //拼接每行的内容
+                    if ((cell = row.getCell(i)) != null) {
+                        sb.append(cell);
+                        // TODO: 2020/1/2 针对Excel数据表格自定义逻辑操作
+                        if (i < row.getPhysicalNumberOfCells()-1){
+                            sb.append("#####");
+                        }
+                    }
+                    //将操作好的数据写入新的文件中
+                    bw.write(sb.toString());
+                    bw.newLine();
+                    bw.flush();
+                }
+            }
+        }
+    }
+
+
 
 }

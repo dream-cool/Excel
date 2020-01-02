@@ -1,4 +1,4 @@
-package com.example.springbootdemo;
+package com.data.excel.utils;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,7 +13,7 @@ import java.util.*;
  * @author clt
  * @create 2020/1/2 13:39
  */
-public class Test {
+public class HandleData {
     public static int count = 0;
 
     public static List<Object> getWorkerExcelData(String filePath, String dirPath) throws IOException {
@@ -64,7 +64,7 @@ public class Test {
     }
 
 
-    public static List<Object> getWeiYuanExcelData(String filePath, String dirPath) throws IOException {
+    public static List<Object> getCommitteeMemberExcelData(String filePath, String dirPath) throws IOException {
         List<Object> list = new ArrayList<Object>(10);
         Set<String> set = new HashSet<String>();
         HSSFWorkbook wookbook = new HSSFWorkbook(new FileInputStream(filePath));
@@ -125,11 +125,38 @@ public class Test {
         }
     }
 
+    public static void getRepeatData() throws IOException {
+        String filePath = "C:/Users/mrchen/Desktop/问题用户名称和手机号.xls";
+        HSSFWorkbook wookbook = new HSSFWorkbook(new FileInputStream(filePath));
+        Writer writer = new FileWriter(new File("C:/Users/mrchen/Desktop/data.txt"),true);
+        Reader reader = new FileReader(new File("C:/Users/mrchen/Desktop/新建文本文档 (2).txt"));
+        BufferedReader br = new BufferedReader(reader);
+        BufferedWriter bw = new BufferedWriter(writer);
+        Sheet sheet = (Sheet) wookbook.getSheetAt(0);
+        Iterator<Row> it = sheet.rowIterator();
+        List<String> list = new ArrayList<String>();
+        String str = null;
+        while ((str = br.readLine()) != null ){
+            if (str.length() > 11){
+                list.add(str.substring(0,11));
+            }
+        }
+        while (it.hasNext()) {
+            Row row = it.next();
+            String phone = row.getCell(1).toString();
+            if (!list.contains(phone)){
+                bw.write(phone);
+                bw.newLine();
+                bw.flush();
+            }
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         String filePath = "C:/Users/mrchen/Desktop/问题用户名称和手机号.xls";
         String workerDirPath = "C:/Users/mrchen/Desktop/工作人员汇总表.xls";
 //        String dirPath = "C:/Users/mrchen/Desktop/合并-修订.xlsx";
 //        getWorkerExcelData(filePath, workerDirPath);
-        getWorkerExcelData(filePath,workerDirPath);
+        getCommitteeMemberExcelData(filePath,workerDirPath);
     }
 }
